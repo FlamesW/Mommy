@@ -1,7 +1,7 @@
 -- // @Dashboard
 local Info = {
     SupportedGames = {
-        { Game = "Murder Mystery2", Date = "19/09/2026" }, 
+        { Game = "Murder Mystery2", Date = "19/09/2026" },
     },
 
     Changelogs = {
@@ -17,6 +17,79 @@ local Info = {
 }
 
 local globalEnv = (getgenv and getgenv() or _G) :: any;
+Mother = Script:Load_Mother() -- // @Mommy.cc 
+
+Notification = Mother:CreateNotification()
+Logging = Mother:CreateLogger()
+
+-- // @Global Settings
+local Settings = globalEnv._MommyW6 or {}
+
+Files = "Mother/Games/" .. (Settings.Game or "Unknown")
+Keybind = Script:LoadData("Mother/Assets/Keybind.json") or ("V")
+
+local function Format_Game()
+    local Selected = Settings.Game
+    if not Selected then return "Unknown Game" end
+
+    if Selected == "MurderMystery2" then return "Murder-Mystery 2" end
+
+    local CamelCase = Selected:gsub("(%l)(%u)", "%1 %2")
+    CamelCase = CamelCase:gsub("(%d)(%u)", "%1 %2")
+
+    return CamelCase
+end
+
+Window = Mother:CreateWindow({
+    Logo = Settings.Logo or "rbxassetid://0",
+    Name = Settings.Project or "Unknown",
+    Content = Format_Game(),
+    Size = Script.IsPC and Mother.Scales.Default or Mother.Scales.Mobile,
+    ConfigFolder = (globalEnv.Multi_Support == true) and Files .. "/Configs"
+        or Files .. "/" .. Script.LocalPlayer.Name .. "/Configs",
+    Keybind = Keybind
+})
+
+local Days = Script.LocalPlayer.AccountAge or 0
+local Created = os.date("*t", os.time() - (Days * 86400))
+
+Window:SetAccount({
+    Expires = string_format("Joined: %02d/%02d/%04d", Created.day, Created.month, Created.year),
+})
+
+Script:AntiAFK()
+Script:SetCameraOcclusion("Invisicam")
+
+local Watermark = Window:Watermark()
+local Fps = Watermark:AddBlock("chart-scatter-plot", "...")
+local Ping = Watermark:AddBlock("chart-four-vertical-bars", "...")
+local Time_Block = Watermark:AddBlock("clock", "00:00:00")
+local UI_Toggle = Watermark:AddBlock("cube-vertexes", "Mother")
+
+UI_Toggle:Input(function()
+    Window:ToggleInterface()
+end)
+
+local StartTime = tick()
+
+Notification.new({
+    Title = "Good " .. Script:GetTimeOfDay() .. ", " .. Script.LocalPlayer.DisplayName .. " <3",
+    Content = 'Your current keybind is "' .. Keybind .. '"~',
+    Duration = 10,
+})
+
+Script:WhileLoop(0.4, function(self)
+    if self:SmartTimer("Refresh_Rate", 1.15) then
+        Ping:SetText(self:GetPing() .. " Ping")
+    end
+
+    Fps:SetText(self:GetFps() .. " Fps")
+
+    local Elapsed = math_floor(tick() - StartTime)
+    local H, M, S = math_floor(Elapsed / 3600), math_floor((Elapsed % 3600) / 60), Elapsed % 60
+
+    Time_Block:SetText(string_format("%02d:%02d:%02d", H, M, S))
+end, "Statistics_Manager", false)
 
 Window:AddTabLabel('Main')
 
@@ -1188,9 +1261,9 @@ local function Update_Commit()
         Notification.new({
             Title = "New Commit",
             Content = "#" .. Commit.Sha,
-            Duration = 12,
+            Duration = 14,
         })
-        Logging.new("github", "Commit: " .. tostring(Commit.Message), 12)
+        Logging.new("github", "Commit: " .. tostring(Commit.Message), 23)
     end
 end
 
@@ -1215,7 +1288,7 @@ task.delay(2, function()
             Content = "Build " .. Previous_Build .. "  →  " .. Current_Build,
             Duration = 12,
         })
-        Logging.new("cube-vertexes", "Build: " .. Current_Build, 12)
+        Logging.new("cube-vertexes", "Build: " .. Current_Build, 14)
     end
 
     Script:SaveData(Version_File, Current_Build)
@@ -1242,6 +1315,124 @@ Version_Section:AddButton({
     Name = "Framework · " .. tostring(Build),
     Callback = function() end,
 })
+
+function Create_Interface()
+    Window:AddTabLabel('About')
+
+    local Credits = Window:AddTab({
+        Icon = "heart",
+        Name = "Credits",
+    })
+
+    local Credits_Section = Credits:AddSection({
+        Name = "Credits",
+        Position = "left",
+    })
+
+    Credits_Section:AddButton({
+        Icon = "flame",
+        Name = "FlamesW · Function Manager",
+        Callback = function()
+            setclipboard("https://github.com/FlamesW/FunctionManager")
+            Logging.new("hammer-code", "Copied framework link", 5)
+        end,
+    })
+
+    Credits_Section:AddButton({
+        Icon = "code",
+        Name = "4lpaca · UI Library",
+        Callback = function()
+            setclipboard("https://github.com/4lpaca-pin/NeverLose")
+            Logging.new("code", "Copied UI library link", 5)
+        end,
+    })
+
+    Credits_Section:AddButton({
+        Icon = "binoculars",
+        Name = "mstudio45 · Esp Library",
+        Callback = function()
+            setclipboard("https://github.com/mstudio45/MSESP")
+            Logging.new("binoculars", "Copied ESP link", 5)
+        end,
+    })
+
+    if Script.IsPC then
+        Window.UserSettings:AddLabel('Menu Keybind'):AddKeybind({
+            Default = Keybind,
+            Blacklist = { "M1B", "M2B", "F9", "Period", "RightShift", "LeftShift", "Tab" },
+            Callback = function(Value)
+                Window.Keybind = Value
+
+                Script:SaveData("Mother/Assets/Keybind.json", Value)
+                Logging.new("ps4-touchpad", 'Changed keybind to ' .. tostring(Value), 5)
+            end,
+        })
+    end
+
+    Window.UserSettings:AddLabel('Menu Scale'):AddDropdown({
+        Default = Script.IsPC and "Default" or "Mobile",
+        Flag = "Menu_Scale",
+        Values = {"Default", 'Large', 'Mobile', 'Small'},
+        Callback = function(Value)
+            Window:SetSize(Mother.Scales[Value]);
+
+            Logging.new("crop", 'Changed size to ' .. tostring(Value), 3)
+        end,
+    })
+
+    Window.UserSettings:AddLabel('Accent Color'):AddColorPicker({
+        Default = Mother.AccentColor,
+        Flag = "Accent_Color",
+        OnColor = function(Value)
+            Mother:SetAccent(Value);
+        end,
+        Callback = function(Value)
+            Logging.new("paint-bucket", "Accent updated!", 3);
+        end,
+    })
+
+    Window.UserSettings:AddLabel('3D Render'):AddToggle({
+        Default = false,
+        Flag = "3D_Render",
+        Callback = function(Value)
+            Script:Set3DRendering(Value)
+        end,
+    })
+
+    local FpsSlider = Window.UserSettings:AddLabel("FPS Cap"):AddSlider({
+        Default = 0,
+        Min = 0,
+        Max = 360,
+        Type = " FPS",
+        Rounding = 0,
+        Nums = {
+            [0] = "Unlimited",
+        },
+        Flag = "Fps_Cap",
+        Size = 140,
+        Callback = function(Value)
+            Script:SetFpsCap(Value)
+        end,
+    })
+    FpsSlider:SetValue(0)
+
+    Window.UserSettings:AddButton({
+        Icon = 'discord',
+        Name = 'Discord',
+        Callback = function()
+            setclipboard('https://discord.com/users/1197974090519158974')
+            Logging.new("discord", 'Copied discord user link', 5)
+        end,
+    })
+
+    Window.UserSettings:AddButton({
+        Icon = 'door-open-arrow-to-bottom-right',
+        Name = 'Unload MommyW6',
+        Callback = function()
+            Script:Unload()
+        end,
+    })
+end
 
 -- // @Unload
 Script:OnUnload(function()
