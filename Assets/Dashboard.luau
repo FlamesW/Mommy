@@ -1,6 +1,6 @@
 -- // @Dashboard
 local Info = {
-    SupportedGames = { -- // 👉 Supported games can be seen here!
+    SupportedGames = { -- // 👇 Supported games can be seen here!
         { Game = "Murder Mystery2", Date = "19/09/2026" }, 
     },
 
