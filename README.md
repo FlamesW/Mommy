@@ -1,5 +1,7 @@
 ## 💌 Mommyware
+
 - Welcome to Mommyware! Made with love by FlamesW 💕
+
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/FlamesW/Mommy/home/Loader.luau"))();
 ```
@@ -8,8 +10,10 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/FlamesW/Mommy/home/Lo
 - [Murder Mystery 2](https://www.roblox.com/games/142823291/Murder-Mystery-2) 🟢
 -----------------------------------------
 
-#### Settings (Put these above the loadstring)
+#### ⚙️ Settings (Put these above the loadstring)
+
 - Redirects the config system into one shared file for all accounts instead of one for each.
+
 ```lua
 getgenv().Multi_Support = true;
 ```
