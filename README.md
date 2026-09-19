@@ -1,5 +1,5 @@
-### Main Loader
-- Welcome to Mommyware~
+## 💌 Mommyware
+- Welcome to Mommyware! Made with love by FlamesW 💕
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/FlamesW/Mommy/home/Loader.luau"))();
 ```
