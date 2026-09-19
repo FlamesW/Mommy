@@ -16,7 +16,7 @@ local Info = {
     Build = "@1.01",
 }
 
--- // @Cache Vars
+-- // @Caches
 local string_format, string_lower = string.format, string.lower
 local math_floor, math_min, math_max = math.floor, math.min, math.max
 local table_insert, table_concat = table.insert, table.concat
@@ -71,7 +71,7 @@ local Watermark = Window:Watermark()
 local Fps = Watermark:AddBlock("chart-scatter-plot", "...")
 local Ping = Watermark:AddBlock("chart-four-vertical-bars", "...")
 local Time_Block = Watermark:AddBlock("clock", "00:00:00")
-local UI_Toggle = Watermark:AddBlock("cube-vertexes", "Mother")
+local UI_Toggle = Watermark:AddBlock("cube-vertexes", "MommyW6")
 
 UI_Toggle:Input(function()
     Window:ToggleInterface()
