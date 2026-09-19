@@ -104,7 +104,7 @@ local Tween_Service = cloneref(Game:GetService("TweenService"))
 local CoreGui = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or Game:FindFirstChild("CoreGui")
 local Protect_Gui = protect_gui or protectgui or (syn and syn.protect_gui) or function(s) return s end
 
-local Main_Color = Color3.fromRGB(8, 8, 13)
+local Main_Color = Color3.fromRGB(225, 225, 255)
 local Stroke_Color = Color3.fromRGB(45, 48, 58)
 local Text_Color = Color3.fromRGB(255, 255, 255)
 local Muted_Color = Color3.fromRGB(186, 186, 186)
