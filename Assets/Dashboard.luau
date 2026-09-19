@@ -30,7 +30,7 @@ Notification = Mother:CreateNotification()
 Logging = Mother:CreateLogger()
 
 -- // @Global Settings
-local Settings = globalEnv._MommyW6 or {}
+local Settings = globalEnv["@Settings"]
 
 Files = "Mother/Games/" .. (Settings.Game or "Unknown")
 Keybind = Script:LoadData("Mother/Assets/Keybind.json") or ("V")
