@@ -16,6 +16,13 @@ local Info = {
     Build = "@1.01",
 }
 
+-- // @Cache Vars
+local string_format, string_lower = string.format, string.lower
+local math_floor, math_min, math_max = math.floor, math.min, math.max
+local table_insert, table_concat = table.insert, table.concat
+local os_date, os_time = os.date, os.time
+
+local Instance_new = Instance.new
 local globalEnv = (getgenv and getgenv() or _G) :: any;
 Mother = Script:Load_Mother() -- // @Mommy.cc 
 
@@ -51,7 +58,7 @@ Window = Mother:CreateWindow({
 })
 
 local Days = Script.LocalPlayer.AccountAge or 0
-local Created = os.date("*t", os.time() - (Days * 86400))
+local Created = os_date("*t", os_time() - (Days * 86400))
 
 Window:SetAccount({
     Expires = string_format("Joined: %02d/%02d/%04d", Created.day, Created.month, Created.year),
@@ -146,9 +153,9 @@ Script:WhileLoop(0.001, function(self)
     local Speed = Slider:GetValue()
 
     if self:IsKeyPressed(Enum.KeyCode.Equals) or self:IsKeyPressed(Enum.KeyCode.KeypadPlus) then
-        Slider:SetValue(math.min(Speed + Step, 1500))
+        Slider:SetValue(math_min(Speed + Step, 1500))
     elseif self:IsKeyPressed(Enum.KeyCode.Minus) or self:IsKeyPressed(Enum.KeyCode.KeypadMinus) then
-        Slider:SetValue(math.max(Speed - Step, 10))
+        Slider:SetValue(math_max(Speed - Step, 10))
     end
 end, "Flight_Controls", false)
 
@@ -300,13 +307,13 @@ Movement:AddLabel("TP Tool"):AddToggle({
                 return Logging.new("triangle-exclamation", "Already have it!", 3.5)
             end
 
-            local Tool = Instance.new("Tool")
+            local Tool = Instance_new("Tool")
             Tool.Name = "@TP_Tool"
             Tool.RequiresHandle = true
             Tool.CanBeDropped = false
             Tool.ToolTip = "Click to teleport to your mouse position"
 
-            local Handle = Instance.new("Part")
+            local Handle = Instance_new("Part")
             Handle.Name = "Handle"
             Handle.Size = Vector3.new(1, 1, 1)
             Handle.Transparency = 1
@@ -349,7 +356,7 @@ Movement:AddLabel("TP Tool"):AddToggle({
 
                 local HitInst = Ray.Instance
                 if HitInst then
-                    local NameLower = string.lower(HitInst.Name)
+                    local NameLower = string_lower(HitInst.Name)
                     if NameLower:find("void") or NameLower:find("lava") or NameLower:find("kill") then
                         return Logging.new("triangle-exclamation", "Clicked a hazard", 2.5)
                     end
@@ -661,7 +668,7 @@ local function Sync_ESP_State(Instance, Prefix, IsPlayer)
     if CS.Skeleton then CS.Skeleton.Enabled = IsPlayer and Get("Skeleton") end
 
     local TracerFrom = Mother.Flags[Prefix .. "_Tracer_From"]
-    if CS.Tracer and TracerFrom then CS.Tracer.From = string.lower(tostring(TracerFrom:GetValue())) end
+    if CS.Tracer and TracerFrom then CS.Tracer.From = string_lower(tostring(TracerFrom:GetValue())) end
 
     CS.FillTransparency = Get("Highlight") and 0.5 or 1
     CS.OutlineTransparency = Get("Highlight") and 0 or 1
@@ -738,7 +745,7 @@ local function Add_Options(Parent, Prefix, IsPlayer)
             if not Handles then return end
             for _, Instance in pairs(Handles) do
                 if Instance and not Instance.Deleted and Instance.CurrentSettings.Tracer then
-                    Instance.CurrentSettings.Tracer.From = string.lower(tostring(Value))
+                    Instance.CurrentSettings.Tracer.From = string_lower(tostring(Value))
                 end
             end
         end,
@@ -926,7 +933,7 @@ local function GetPlayerValues()
     local List = {}
     for _, P in ipairs(Script.Players:GetPlayers()) do
         if P ~= Script.LocalPlayer then
-            table.insert(List, Format_Player(P))
+            table_insert(List, Format_Player(P))
         end
     end
     return List
@@ -1066,11 +1073,10 @@ Script:WhileLoop(0.1, function(self)
         end
     end
 
-    Stats_Label:SetText(string.format("Speed: %s MPH\nMoving: %s", tostring(MPH), Moving and "true" or "false"))
-
+    Stats_Label:SetText(string_format("Speed: %s MPH\nMoving: %s", tostring(MPH), Moving and "true" or "false"))
     local Hum = self:GetHumanoid()
 
-    local Health = Hum and string.format("%d/%d", math.floor(Hum.Health), math.floor(Hum.MaxHealth)) or "0/0"
+    local Health = Hum and string_format("%d/%d", math_floor(Hum.Health), math_floor(Hum.MaxHealth)) or "0/0"
     L_Health:SetText("Health: " .. Health)
 
     L_Speed:SetText("Speed: " .. tostring(self:CalculateSpeed("MPH", 1)) .. " MPH")
@@ -1122,26 +1128,26 @@ do
             if not OpenAt then
                 local Rest = Text:sub(Index)
                 if #Rest > 0 then
-                    table.insert(Out, WrapPlain(Rest, MaxLen))
+                    table_insert(Out, WrapPlain(Rest, MaxLen))
                 end
                 break
             end
 
             if OpenAt > Index then
-                table.insert(Out, WrapPlain(Text:sub(Index, OpenAt - 1), MaxLen))
+                table_insert(Out, WrapPlain(Text:sub(Index, OpenAt - 1), MaxLen))
             end
 
             local CloseAt = Text:find(PROTECT_CLOSE, OpenAt + 1, true)
             if not CloseAt then
-                table.insert(Out, Text:sub(OpenAt + 1))
+                table_insert(Out, Text:sub(OpenAt + 1))
                 break
             end
 
-            table.insert(Out, Text:sub(OpenAt + 1, CloseAt - 1))
+            table_insert(Out, Text:sub(OpenAt + 1, CloseAt - 1))
             Index = CloseAt + 1
         end
 
-        return table.concat(Out)
+        return table_concat(Out)
     end
 
     Script.WrapText = Wrap
@@ -1168,7 +1174,7 @@ do
             Label.GetText = function(self) return RawText end
         end
 
-        table.insert(self.AutoLabels, {
+        table_insert(self.AutoLabels, {
             Handle = Label,
             GetRaw = function() return RawText end,
         })
