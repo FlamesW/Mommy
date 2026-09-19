@@ -2,18 +2,39 @@
 local Game: DataModel = game
 if not (Game:IsLoaded()) then Game.Loaded:Wait() end
 
+local globalEnv = (getgenv and getgenv() or _G) :: any;
 local write_file, read_file, is_file, is_folder, make_folder = writefile, readfile, isfile, isfolder, makefolder
 
 local table_insert, table_concat = table.insert, table.concat
 local string_gmatch, string_char, string_byte, string_format, math_random = string.gmatch, string.char, string.byte, string.format, math.random
 local task_spawn, os_clock, os_time, loadstring, tostring, warn = task.spawn, os.clock, os.time, loadstring, tostring, warn
 
--- // @Files
-local Files = {
-    ["Murder Mystery 2"] = { File = "MM2/File.luau", Universe = 66654135, UUID = 142823291 },
-    ["Random Game"] = { File = "Random/File.luau", Universe = 9271746647, UUID = 123974602339071 },
-}
+-- // @Cache Functions
+globalEnv.Load_Function = globalEnv.Load_Function or function(ID, Builder, ...)
+    if globalEnv[ID] == nil then
+        if type(Builder) == "function" then
+            globalEnv[ID] = Builder(...)
+        else
+            globalEnv[ID] = Builder
+        end
+    end
+    return globalEnv[ID]
+end
+
+-- // @Menu Settings
+globalEnv.Load_Function("@Settings", {
+    Logo = "rbxassetid://129855843582244",
+    Project = "MommyW6",
+
+    Files = {
+        ["Murder Mystery 2"] = { File = "MM2/File.luau", Universe = 66654135, UUID = 142823291 },
+        ["Random Game"] = { File = "Random/File.luau", Universe = 9271746647, UUID = 123974602339071 },
+    }
+})
+
+local Settings = globalEnv["@Settings"]
 local Repo, Point = ("https://raw.githubusercontent.com/FlamesW/Mommy/home/Games/"), (Game.GameId)
+local Files = Settings.Files
 
 local function Log(...)
     warn("[Mommy]:", ...)
@@ -32,6 +53,63 @@ local function Create_Folder(Path)
         if not is_folder(Sub) then make_folder(Sub) end
     end
 end
+
+-- // @Load_Module
+globalEnv.Load_Function("@Load_Module", function()
+    local Source = "https://github.com/FlamesW/FunctionManager/releases/latest/download/Module.luau"
+    local Repo = "https://raw.githubusercontent.com/FlamesW/FunctionManager"
+
+    Create_Folder("@File_Caches")
+
+    local File = "@File_Caches/Module.luau"
+
+    local function Execute(Content)
+        local Chunk, Error = loadstring(Content)
+
+        if not Chunk then
+            warn("[FunctionManager]: Failed to compile module:\n" .. tostring(Error))
+        end
+
+        local Success, Result = pcall(Chunk)
+
+        if not Success then
+            warn("[FunctionManager]: Failed to execute module:\n" .. tostring(Result))
+        end
+
+        return Result
+    end
+
+    if is_file(File) then
+        local Content = read_file(File)
+
+        if Content then
+            local Current_Version = Content:match('Build%s*=%s*"@([%d%.]+)"')
+            local Latest_Version
+
+            local Success, Response = pcall(function()
+                return Game:HttpGet(Repo .. "/home/%40Version.cfg?nocache=" .. tostring(os_clock()))
+            end)
+
+            if Success and Response then
+                Latest_Version = Response:match("@([%d%.]+)")
+            end
+
+            if Latest_Version and Current_Version and Latest_Version ~= Current_Version then
+                local FreshContent = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
+                pcall(write_file, File, FreshContent)
+
+                return Execute(FreshContent)
+            end
+
+            return Execute(Content)
+        end
+    end
+
+    local Content = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
+
+    pcall(write_file, File, Content)
+    return Execute(Content)
+end)
 
 -- // @Shift
 local Key = 21
@@ -52,48 +130,42 @@ local function Simple_Decode(Data)
     return table_concat(Out)
 end
 
-local function Load_Game(Url, Cache, Name)
-    local Source
+-- // @Load_Game
+globalEnv.Load_Function("@Load_Game", function()
+    return function(File, Cache_Path, Name)
+        local Source
 
-    if is_file(Cache) then
-        Source = Simple_Decode(read_file(Cache))
+        if is_file(Cache_Path) then
+            Source = Simple_Decode(read_file(Cache_Path))
 
-        task_spawn(function()
-            local Success, Remote = pcall(function()
-                return Game:HttpGet(Url .. "?nocache=" .. tostring(os_clock() * 10000))
+            task_spawn(function()
+                local Success, Remote = pcall(function()
+                    return Game:HttpGet(File .. "?nocache=" .. tostring(os_clock() * 10000))
+                end)
+
+                if Success and Remote and Remote ~= Source then
+                    pcall(write_file, Cache_Path, Simple_Encode(Remote))
+                end
             end)
-
-            if Success and Remote and Remote ~= Source then
-                pcall(write_file, Cache, Simple_Encode(Remote))
-            end
-        end)
-    else
-        Source = Game:HttpGet(Url .. "?nocache=" .. tostring(os_clock() * 10000))
-        pcall(write_file, Cache, Simple_Encode(Source))
-    end
-
-    local fn, Err = loadstring(Source)
-    if not fn then
-        Log("Compile error:", Err)
-        return nil
-    end
-
-    local ok, Response = pcall(fn)
-    if not ok then
-        Log("Runtime error:", Response)
-    end
-
-    return Response
-end
-
-local function From_GameToFile()
-    for File, Info in pairs(Files) do
-        if Info.Universe == Point then
-            return File, Info
+        else
+            Source = Game:HttpGet(File .. "?nocache=" .. tostring(os_clock() * 10000))
+            pcall(write_file, Cache_Path, Simple_Encode(Source))
         end
+
+        local fn, Err = loadstring(Source)
+        if not fn then
+            Log("Compile error:", Err)
+            return nil
+        end
+
+        local ok, Response = pcall(fn)
+        if not ok then
+            Log("Runtime error:", Response)
+        end
+
+        return Response
     end
-    return nil, nil
-end
+end)
 
 -- // @Setup
 local cloneref: (Instance) -> Instance = (cloneref or clonereference or function(instance: Instance)
@@ -147,7 +219,16 @@ local function Make_Shadow(Parent)
     }
 end
 
--- // @Main Loader
+-- // @Game Lookup
+local function From_GameToFile()
+    for File, Info in pairs(Files) do
+        if Info.Universe == Point then
+            return File, Info
+        end
+    end
+    return nil, nil
+end
+
 local Supported, Game_Info = From_GameToFile()
 
 if not Supported then
@@ -235,7 +316,7 @@ if not Supported then
     Header_Dot_Corner.CornerRadius = UDim.new(1, 0)
     Header_Dot_Corner.Parent = Header_Dot
 
-    local Dot_Thread = task_spawn(function()
+    task_spawn(function()
         while Root.Parent do
             Play(Header_Dot, TweenInfo.new(0.6, Enum.EasingStyle.Quad), { BackgroundTransparency = 0.7 })
             task.wait(0.6)
@@ -286,6 +367,8 @@ if not Supported then
 
     local Rows = {}
     local Row_Height_Inner = 46
+
+    local Close
 
     for Index, Entry in ipairs(Game_List) do
         local Row = Instance.new("Frame")
@@ -525,11 +608,12 @@ if not Supported then
     return
 end
 
+-- // @Path Setup
 local File = Repo .. Game_Info.File
-local Cache = "Mother/Assets/Caches/" .. Supported:gsub("%s+", "") .. ".File"
+local Cache_Path = "Mother/Assets/Caches/" .. Supported:gsub("%s+", "") .. ".File"
 
 local function Load_Script()
-    Load_Game(File, Cache, Supported)
+    globalEnv["@Load_Game"](File, Cache_Path, Supported)
 end
 
 if is_folder("Mother/Games") then
@@ -537,6 +621,7 @@ if is_folder("Mother/Games") then
     return
 end
 
+-- // @Downloader
 local Mother_Downloader = (function()
     local Track_Color = Color3.fromRGB(30, 29, 36)
 
@@ -682,13 +767,6 @@ local Mother_Downloader = (function()
     end)
 
     local Loader = { Root = Root, ScreenGui = ScreenGui }
-
-    function Loader:SetAccent(Color)
-        Accent_Color = Color
-        Fill.BackgroundColor3 = Color
-        Title_Dot.BackgroundColor3 = Color
-        Title_Icon.TextColor3 = Color
-    end
 
     function Loader:SetStatus(Text)
         Status.Text = tostring(Text or "")
