@@ -7,7 +7,7 @@ local Info = {
 
     Changelogs = {
         {
-            Title = "MommyW6 1.01",
+            Title = "MommyW6 · 1.01",
             Date = "N/A",
             Changes = {
                 "- This is the beginning of our journey:)~",
