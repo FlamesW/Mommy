@@ -1,7 +1,7 @@
 -- // Example Game
 local Game, loadstring = game, loadstring;
 local globalEnv = (getgenv and getgenv() or _G) :: any;
-local File = "RandomGame"
+local File = "Random Game"
 
 local Load_Module = globalEnv["@Load_Module"]
 globalEnv["@Settings"].Game = File
