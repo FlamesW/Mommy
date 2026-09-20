@@ -4129,6 +4129,7 @@ function Mother:CreateWindow(Config)
 	LogoImage.ZIndex = 7
 	LogoImage.Image = Window.Logo
 	LogoImage.ImageColor3 = Mother.IconColor
+
 	Mother:AddSignal(Mother.AccentChanged.Event:Connect(function(color)
         Mother.PlayAnimate(LogoImage, SlowyTween, {
             ImageColor3 = color
