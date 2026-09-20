@@ -1469,5 +1469,6 @@ Script:OnUnload(function()
     for _, Instance in ipairs({
         "Mother", "Notification", "Logging", "Multi_Support",
     }) do
-    if globalEnv[Instance] then globalEnv[Instance] = nil end
+        if globalEnv[Instance] then globalEnv[Instance] = nil end
+    end
 end)
