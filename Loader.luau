@@ -160,6 +160,8 @@ globalEnv.Cache("@Load_Game", function()
             return nil
         end
 
+        Log("Loaded:", Name)
+
         local ok, Response = pcall(fn)
         if not ok then
             Log("Runtime error:", Response)
