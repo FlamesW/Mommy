@@ -14,18 +14,13 @@ local cloneref: (Instance) -> Instance = (cloneref or clonereference or function
 end)
 
 -- // @Cache Functions
-globalEnv.Cache = globalEnv.Cache or function(ID, Builder, ...)
+globalEnv.Cache = globalEnv.Cache or function(ID, Build, ...)
     if globalEnv[ID] == nil then
-        if typeof(Builder) == "function" then
-            globalEnv[ID] = Builder(...)
-        else
-            globalEnv[ID] = Builder
-        end
+        globalEnv[ID] = (typeof(Build) == "function") and Build(...) or Build
     end
     return globalEnv[ID]
 end
 
--- // @Dependecies
 globalEnv.Cache("@Settings", {
     Logo = "rbxassetid://129855843582244",
     Project = "MommyW6",
@@ -138,7 +133,6 @@ local function Simple_Decode(Data)
     return table_concat(Out)
 end
 
--- // @Load_Game
 globalEnv.Cache("@Load_Game", function()
     return function(File, Cache_Path, Name)
         local Source
@@ -175,7 +169,6 @@ globalEnv.Cache("@Load_Game", function()
     end
 end)
 
--- // @Setup
 local Tween_Service = cloneref(Game:GetService("TweenService"))
 local CoreGui = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or Game:FindFirstChild("CoreGui")
 local Protect_Gui = protect_gui or protectgui or (syn and syn.protect_gui) or function(s) return s end
@@ -612,7 +605,6 @@ if not Supported then
     return
 end
 
--- // @Path Setup
 local File = Repo .. Game_Info.File
 local Cache_Path = "Mother/Assets/Caches/" .. Supported:gsub("%s+", "") .. ".File"
 
