@@ -686,7 +686,7 @@ local function Add_Options(Parent, Prefix, IsPlayer)
     local Handles = Prefix == "ESP_Players" and Script.EspCache.Players or Script.EspCache.NPCs
 
     Options:AddLabel("Color"):AddColorPicker({
-        Default = Color3.fromRGB(80, 180, 255),
+        Default = Color3.fromRGB(255, 255, 255),
         Flag = Prefix .. "_Color",
         OnColor = function(Value)
             local Team_Flag = Mother.Flags[Prefix .. "_TeamColor"]
