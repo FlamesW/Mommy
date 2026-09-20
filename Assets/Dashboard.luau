@@ -23,12 +23,13 @@ local string_format, string_lower = string.format, string.lower
 local math_floor, math_min, math_max = math.floor, math.min, math.max
 local table_insert, table_concat = table.insert, table.concat
 local os_date, os_time = os.date, os.time
-
 local Instance_new = Instance.new
-Mother = Script:Load_Mother() -- // @Mommy.cc 
 
+Mother = Script:Load_Mother() -- // @Mommy.cc 
 Notification = Mother:CreateNotification()
 Logging = Mother:CreateLogger()
+
+globalEnv.Mother, globalEnv.Notification, globalEnv.Logging = Mother, Notification, Logging 
 
 -- // @Global Settings
 local Settings = globalEnv["@Settings"]
@@ -1465,7 +1466,8 @@ Script:OnUnload(function()
     Script:SetGravity(196.2)
     Script:SetFOV(70)
 
-    if globalEnv.Multi_Support then
-        globalEnv.Multi_Support = nil;
-    end
+    for _, Instance in ipairs({
+        "Mother", "Notification", "Logging", "Multi_Support",
+    }) do
+    if globalEnv[Instance] then globalEnv[Instance] = (nil) end
 end)
