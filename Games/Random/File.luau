@@ -22,6 +22,7 @@ local Load_Module = globalEnv["@Load_Module"]
 
 local Function_Manager = (Load_Module and Load_Module())
     or (is_file("@File_Caches/Module.luau") and loadstring(read_file("@File_Caches/Module.luau"))())
+    or loadstring(Game:HttpGet("https://raw.githubusercontent.com/FlamesW/FunctionManager/home/Source/Main.luau"))();
 
 local Script = Function_Manager.Launch({}):Build("@Settings/Game", File)
 
