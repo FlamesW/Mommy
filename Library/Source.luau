@@ -835,13 +835,8 @@ Mother.Drag = function(InputFrame: Frame, MoveFrame: Frame, Speed : number)
 end;
 
 Mother.Rounding = function(num, numDecimalPlaces)
-    if type(num) ~= "number" then num = tonumber(num) or 0 end
-    if type(numDecimalPlaces) ~= "number" then numDecimalPlaces = 0 end
-
-    numDecimalPlaces = math.floor(numDecimalPlaces)
-
-    local mult = 10 ^ numDecimalPlaces
-    return math.floor(num * mult + 0.5) / mult
+	local mult = 10 ^ (numDecimalPlaces or 0);
+	return math.floor(num * mult + 0.5) / mult;
 end;
 
 Mother.ProcessParams = function(self , Params , Fixed)
@@ -1752,10 +1747,6 @@ function Mother:RegisiterHandler(Handler: Frame , Signal)
 			Size = 125,
 			Callback = EmptyFunction,
 		});
-        if type(Config.Rounding) ~= "number" then
-            Config.Rounding = 0;
-        end;
-        Config.Rounding = math.floor(Config.Rounding);
 
 		local SliderLib = {};
 
@@ -1996,7 +1987,7 @@ function Mother:RegisiterHandler(Handler: Frame , Signal)
 		local Update = function(Input)
 			local SizeScale = math.clamp((((Input.Position.X) - SlideMain.AbsolutePosition.X) / SlideMain.AbsoluteSize.X), 0, 1);
 			local Main = ((Config.Max - Config.Min) * SizeScale) + Config.Min;
-			local Value = Mother.Rounding(Main,Config.Rounding);
+			local Value = Mother:Rounding(Main,Config.Rounding);
 			local PositionX = UDim2.fromScale(SizeScale, 1);
 			local Size = ((Value - Config.Min) / (Config.Max - Config.Min)) + 0.02;
 
