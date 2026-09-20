@@ -1,18 +1,22 @@
--- // @Mommyware
-local Game: DataModel = game
+-- // @Mommyware Loader | [#7f39b1b]
+local Game: DataModel, typeof = game, typeof
 if not (Game:IsLoaded()) then Game.Loaded:Wait() end
 
+if typeof(_IsLoadedFM) == "function" and _IsLoadedFM() then return Logging.new("code", "Script Already loaded!", 5) end
 local globalEnv = (getgenv and getgenv() or _G) :: any;
 local write_file, read_file, is_file, is_folder, make_folder = writefile, readfile, isfile, isfolder, makefolder
 
 local table_insert, table_concat = table.insert, table.concat
 local string_gmatch, string_char, string_byte, string_format, math_random = string.gmatch, string.char, string.byte, string.format, math.random
-local task_spawn, os_clock, os_time, loadstring, tostring, warn = task.spawn, os.clock, os.time, loadstring, tostring, warn
+local task_spawn, os_clock, os_time, loadstring,  tostring, warn = task.spawn, os.clock, os.time, loadstring, tostring, warn
+local cloneref: (Instance) -> Instance = (cloneref or clonereference or function(instance: Instance)
+    return instance
+end)
 
 -- // @Cache Functions
-globalEnv.Load_Function = globalEnv.Load_Function or function(ID, Builder, ...)
+globalEnv.Cache = globalEnv.Cache or function(ID, Builder, ...)
     if globalEnv[ID] == nil then
-        if type(Builder) == "function" then
+        if typeof(Builder) == "function" then
             globalEnv[ID] = Builder(...)
         else
             globalEnv[ID] = Builder
@@ -21,8 +25,8 @@ globalEnv.Load_Function = globalEnv.Load_Function or function(ID, Builder, ...)
     return globalEnv[ID]
 end
 
--- // @Menu Settings
-globalEnv.Load_Function("@Settings", {
+-- // @Dependecies
+globalEnv.Cache("@Settings", {
     Logo = "rbxassetid://129855843582244",
     Project = "MommyW6",
 
@@ -32,8 +36,8 @@ globalEnv.Load_Function("@Settings", {
     }
 })
 
+local Repo, Point = "https://raw.githubusercontent.com/FlamesW/Mommy/home/Games/", (Game.GameId)
 local Settings = globalEnv["@Settings"]
-local Repo, Point = ("https://raw.githubusercontent.com/FlamesW/Mommy/home/Games/"), (Game.GameId)
 local Files = Settings.Files
 
 local function Log(...)
@@ -55,60 +59,64 @@ local function Create_Folder(Path)
 end
 
 -- // @Load_Module
-globalEnv.Load_Function("@Load_Module", function()
-    local Source = "https://github.com/FlamesW/FunctionManager/releases/latest/download/Module.luau"
-    local Repo = "https://raw.githubusercontent.com/FlamesW/FunctionManager"
+globalEnv.Cache("@Load_Module", function()
+    return function()
+        local Source = "https://github.com/FlamesW/FunctionManager/releases/latest/download/Module.luau"
+        local Repo = "https://raw.githubusercontent.com/FlamesW/FunctionManager"
 
-    Create_Folder("@File_Caches")
+        Create_Folder("@File_Caches")
 
-    local File = "@File_Caches/Module.luau"
+        local File = "@File_Caches/Module.luau"
 
-    local function Execute(Content)
-        local Chunk, Error = loadstring(Content)
+        local function Execute(Content)
+            local Chunk, Error = loadstring(Content)
 
-        if not Chunk then
-            warn("[FunctionManager]: Failed to compile module:\n" .. tostring(Error))
-        end
-
-        local Success, Result = pcall(Chunk)
-
-        if not Success then
-            warn("[FunctionManager]: Failed to execute module:\n" .. tostring(Result))
-        end
-
-        return Result
-    end
-
-    if is_file(File) then
-        local Content = read_file(File)
-
-        if Content then
-            local Current_Version = Content:match('Build%s*=%s*"@([%d%.]+)"')
-            local Latest_Version
-
-            local Success, Response = pcall(function()
-                return Game:HttpGet(Repo .. "/home/%40Version.cfg?nocache=" .. tostring(os_clock()))
-            end)
-
-            if Success and Response then
-                Latest_Version = Response:match("@([%d%.]+)")
+            if not Chunk then
+                warn("[FunctionManager]: Failed to compile module:\n" .. tostring(Error))
+                return nil
             end
 
-            if Latest_Version and Current_Version and Latest_Version ~= Current_Version then
-                local FreshContent = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
-                pcall(write_file, File, FreshContent)
+            local Success, Result = pcall(Chunk)
 
-                return Execute(FreshContent)
+            if not Success then
+                warn("[FunctionManager]: Failed to execute module:\n" .. tostring(Result))
+                return nil
             end
 
-            return Execute(Content)
+            return Result
         end
+
+        if is_file(File) then
+            local Content = read_file(File)
+
+            if Content then
+                local Current_Version = Content:match('Build%s*=%s*"@([%d%.]+)"')
+                local Latest_Version
+
+                local Success, Response = pcall(function()
+                    return Game:HttpGet(Repo .. "/home/%40Version.cfg?nocache=" .. tostring(os_clock()))
+                end)
+
+                if Success and Response then
+                    Latest_Version = Response:match("@([%d%.]+)")
+                end
+
+                if Latest_Version and Current_Version and Latest_Version ~= Current_Version then
+                    local FreshContent = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
+                    pcall(write_file, File, FreshContent)
+
+                    return Execute(FreshContent)
+                end
+
+                return Execute(Content)
+            end
+        end
+
+        local Content = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
+
+        pcall(write_file, File, Content)
+        return Execute(Content)
     end
-
-    local Content = Game:HttpGet(Source .. "?nocache=" .. tostring(os_clock()))
-
-    pcall(write_file, File, Content)
-    return Execute(Content)
 end)
 
 -- // @Shift
@@ -131,7 +139,7 @@ local function Simple_Decode(Data)
 end
 
 -- // @Load_Game
-globalEnv.Load_Function("@Load_Game", function()
+globalEnv.Cache("@Load_Game", function()
     return function(File, Cache_Path, Name)
         local Source
 
@@ -168,10 +176,6 @@ globalEnv.Load_Function("@Load_Game", function()
 end)
 
 -- // @Setup
-local cloneref: (Instance) -> Instance = (cloneref or clonereference or function(instance: Instance)
-    return instance
-end)
-
 local Tween_Service = cloneref(Game:GetService("TweenService"))
 local CoreGui = (gethui and gethui()) or (get_hidden_gui and get_hidden_gui()) or Game:FindFirstChild("CoreGui")
 local Protect_Gui = protect_gui or protectgui or (syn and syn.protect_gui) or function(s) return s end
