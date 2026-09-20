@@ -41,7 +41,7 @@ local function Format_Game()
     local Selected = Settings.Game
     if not Selected then return "Unknown Game" end
 
-    if Selected == "MurderMystery2" then return "Murder-Mystery 2" end
+    if Selected == "Murder Mystery 2" then return "Murder-Mystery 2" end
 
     local CamelCase = Selected:gsub("(%l)(%u)", "%1 %2")
     CamelCase = CamelCase:gsub("(%d)(%u)", "%1 %2")
