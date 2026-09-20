@@ -1196,7 +1196,7 @@ do
 end
 
 local Changelogs = Window:AddTab({
-    Icon = "whatsapp",
+    Icon = "calendar",
     Name = "Changelogs",
 })
 
