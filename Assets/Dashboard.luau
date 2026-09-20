@@ -17,13 +17,13 @@ local Info = {
 }
 
 -- // @Caches
-local globalEnv = (getgenv and getgenv() or _G) :: any;
-
 local string_format, string_lower = string.format, string.lower
 local math_floor, math_min, math_max = math.floor, math.min, math.max
 local table_insert, table_concat = table.insert, table.concat
 local os_date, os_time = os.date, os.time
 local Instance_new = Instance.new
+
+local globalEnv = (getgenv and getgenv() or _G) :: any;
 
 Mother = Script:Load_Mother() -- // @Mommy.cc 
 Notification = Mother:CreateNotification()
