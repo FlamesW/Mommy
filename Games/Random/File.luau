@@ -1,14 +1,12 @@
 -- // Example Game
-local Game, loadstring = game, loadstring;
+local Game: DataModel = game;
+-- if not (Game:IsLoaded()) then Game.Loaded:Wait() end
+
 local globalEnv = (getgenv and getgenv() or _G) :: any;
-local File = "Random Game"
+local loadstring, read_file, is_file = loadstring, readfile, isfile;
+-- globalEnv["@Loaded"] = true;
 
-local Load_Module = globalEnv["@Load_Module"]
-globalEnv["@Settings"].Game = File
-
-local Function_Manager = Load_Module and Load_Module()
-    or loadstring(Game:HttpGet("https://raw.githubusercontent.com/FlamesW/FunctionManager/home/Source/Main.luau"))()
-local Script = Function_Manager.Launch({})
+if not globalEnv["@Loaded"] then return end
 
 -- // @IronBrew1 Obfuscator
 if not IB_OBFUSCATED then
@@ -18,6 +16,14 @@ if not IB_OBFUSCATED then
     IB_CRASH = function() end
     IB_LINE = 1
 end
+
+local File = "Random Game";
+local Load_Module = globalEnv["@Load_Module"]
+
+local Function_Manager = (Load_Module and Load_Module())
+    or (is_file("@File_Caches/Module.luau") and loadstring(read_file("@File_Caches/Module.luau"))())
+
+local Script = Function_Manager.Launch({}):Build("@Settings/Game", File)
 
 -- // Functions here
 
