@@ -1899,7 +1899,7 @@ function Mother:RegisiterHandler(Handler: Frame , Signal)
 			local OutVal = Mother:ParseInput(ValueLabel.Text , true);
 			if OutVal then
 				local rx = math.clamp(OutVal , Config.Min , Config.Max);
-				local Value = Mother:Rounding(rx,Config.Rounding);
+				local Value = Mother.Rounding(rx,Config.Rounding);
 
 				if Value then
 					Config.Default = Value;
@@ -1987,7 +1987,7 @@ function Mother:RegisiterHandler(Handler: Frame , Signal)
 		local Update = function(Input)
 			local SizeScale = math.clamp((((Input.Position.X) - SlideMain.AbsolutePosition.X) / SlideMain.AbsoluteSize.X), 0, 1);
 			local Main = ((Config.Max - Config.Min) * SizeScale) + Config.Min;
-			local Value = Mother:Rounding(Main,Config.Rounding);
+			local Value = Mother.Rounding(Main,Config.Rounding);
 			local PositionX = UDim2.fromScale(SizeScale, 1);
 			local Size = ((Value - Config.Min) / (Config.Max - Config.Min)) + 0.02;
 
