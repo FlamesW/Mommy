@@ -34,7 +34,7 @@ globalEnv.Mother, globalEnv.Notification, globalEnv.Logging = Mother, Notificati
 -- // @Global Settings
 local Settings = globalEnv["@Settings"]
 
-Files = "Mother/Games/" .. (Settings.Game or "Unknown")
+Files = "Mother/Games/" .. (Settings.Game or "Testing")
 Keybind = Script:LoadData("Mother/Assets/Keybind.json") or ("V")
 
 local function Format_Game()
@@ -51,7 +51,7 @@ end
 
 Window = Mother:CreateWindow({
     Logo = Settings.Logo or "rbxassetid://0",
-    Name = Settings.Project or "Unknown",
+    Name = Settings.Project or "Testing",
     Content = Format_Game(),
     Size = Script.IsPC and Mother.Scales.Default or Mother.Scales.Mobile,
     ConfigFolder = (globalEnv.Multi_Support == true) and Files .. "/Configs"
