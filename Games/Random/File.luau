@@ -4,7 +4,7 @@ local globalEnv = (getgenv and getgenv() or _G) :: any;
 local File = "RandomGame"
 
 local Load_Module = globalEnv["@Load_Module"]
-globalEnv["@Settings"] = globalEnv["@Settings"] or { Game = File or "UnknownGame" }
+globalEnv["@Settings"].Game = File
 
 local Function_Manager = Load_Module and Load_Module()
     or loadstring(Game:HttpGet("https://raw.githubusercontent.com/FlamesW/FunctionManager/home/Source/Main.luau"))()
