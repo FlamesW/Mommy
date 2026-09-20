@@ -161,6 +161,7 @@ globalEnv.Cache("@Load_Game", function()
         end
 
         Log("Loaded:", Name)
+        globalEnv["@Loaded"] = true;
 
         local ok, Response = pcall(fn)
         if not ok then
