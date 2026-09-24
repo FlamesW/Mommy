@@ -53,7 +53,7 @@ Window = Mother:CreateWindow({
     Logo = Settings.Logo or "rbxassetid://0",
     Name = Settings.Project or "Testing",
     Content = Format_Game(),
-    Size = Script.IsPC() and Mother.Scales.Default or Mother.Scales.Mobile,
+    Size = Script:IsPC() and Mother.Scales.Default or Mother.Scales.Mobile,
     ConfigFolder = (globalEnv.Multi_Support == true) and Files .. "/Configs"
         or Files .. "/" .. Script.LocalPlayer.Name .. "/Configs",
     Keybind = Keybind
@@ -1364,7 +1364,7 @@ function Create_Interface()
         end,
     })
 
-    if Script.IsPC() then
+    if Script:IsPC() then
         Window.UserSettings:AddLabel('Menu Keybind'):AddKeybind({
             Default = Keybind,
             Blacklist = { "M1B", "M2B", "F9", "Period", "RightShift", "LeftShift", "Tab" },
@@ -1378,7 +1378,7 @@ function Create_Interface()
     end
 
     Window.UserSettings:AddLabel('Menu Scale'):AddDropdown({
-        Default = Script.IsPC() and "Default" or "Mobile",
+        Default = Script:IsPC() and "Default" or "Mobile",
         Flag = "Menu_Scale",
         Values = {"Default", 'Large', 'Mobile', 'Small'},
         Callback = function(Value)
