@@ -942,27 +942,41 @@ local function GetPlayerValues()
 end
 
 local Player_Dropdown = Victim:AddLabel("Player"):AddDropdown({
-    Default = "None",
+    Default = nil,
+    Searchable = true,
     Values = GetPlayerValues(),
     Multi = false,
     AutoUpdate = true,
-    Size = 130,
+    Size = 200,
+    Images = true,
     Callback = function(Value)
         if UpdatingFlag then return end
 
-        for _, Person in ipairs(Script.Players:GetPlayers()) do
-            if Format_Player(Person) == Value then
+        local Was_Spectating = Script:IsSpectating()
 
-                if Script:IsSpectating() then
-                    Script:StopSpectate()
+        local New_Target = nil
+        if Value ~= nil then
+            for _, Person in ipairs(Script.Players:GetPlayers()) do
+                if Format_Player(Person) == Value then
+                    New_Target = Person
+                    break
                 end
+            end
+        end
 
-                if SpectateToggle and SpectateToggle:GetValue() then
-                    SpectateToggle:SetValue(false)
-                end
+        Selected_Victim = New_Target
 
-                Selected_Victim = Person
-                break
+        if New_Target then
+            if Was_Spectating then
+                Script:Spectate(New_Target)
+            end
+        else
+            if Was_Spectating then
+                Script:StopSpectate()
+            end
+
+            if SpectateToggle and SpectateToggle:GetValue() then
+                SpectateToggle:SetValue(false)
             end
         end
     end,
@@ -973,10 +987,8 @@ local Spectate_Label = Victim:AddLabel("Spectate")
 SpectateToggle = Spectate_Label:AddToggle({
     Default = false,
     Callback = function(Value)
+        if Value and not Selected_Victim then return end
         if Value then
-            if not Selected_Victim then
-                return
-            end
             Script:Spectate(Selected_Victim)
         else
             Script:StopSpectate()
@@ -1003,16 +1015,7 @@ Script:WhileLoop(1, function()
         Player_Dropdown:SetValues(NewValues)
 
         if Selected_Victim and not Selected_Victim.Parent then
-            Selected_Victim = nil
-            Player_Dropdown:SetValue("None")
-
-            if Script:IsSpectating() then
-                Script:StopSpectate()
-            end
-
-            if SpectateToggle and SpectateToggle:GetValue() then
-                SpectateToggle:SetValue(false)
-            end
+            Player_Dropdown:SetValue(nil)
         end
 
         UpdatingFlag = false
@@ -1087,114 +1090,6 @@ Script:WhileLoop(0.1, function(self)
     L_Date:SetText("Date: " .. tostring(self:Date("%Y/%m/%d")))
 end, "Info_Statistics")
 
-Script.AutoLabels = {}
-
-do
-    local Interface_Scale = { Small = 20, Mobile = 30, Default = 32, Large = 45 }
-    local PROTECT_OPEN, PROTECT_CLOSE = "\1", "\2"
-
-    local function GetMaxLen()
-        local ScaleFlag = Mother.Flags and Mother.Flags["Menu_Scale"]
-        if not ScaleFlag then return Interface_Scale.Default end
-
-        local Scale = ScaleFlag:GetValue() or "Default"
-        return Interface_Scale[Scale] or Interface_Scale.Default
-    end
-
-    local function WrapPlain(Text, MaxLen)
-        if #Text <= MaxLen then return Text end
-
-        local Out, Line = "", ""
-        for Word in Text:gmatch("%S+") do
-            if #Line + #Word + 1 > MaxLen then
-                Out = Out .. Line .. "\n"
-                Line = Word
-            else
-                Line = Line == "" and Word or (Line .. " " .. Word)
-            end
-        end
-        if Line ~= "" then Out = Out .. Line end
-
-        return Out
-    end
-
-    local function Wrap(Text, MaxLen)
-        Text = tostring(Text)
-
-        local Out = {}
-        local Index = 1
-
-        while Index <= #Text do
-            local OpenAt = Text:find(PROTECT_OPEN, Index, true)
-
-            if not OpenAt then
-                local Rest = Text:sub(Index)
-                if #Rest > 0 then
-                    table_insert(Out, WrapPlain(Rest, MaxLen))
-                end
-                break
-            end
-
-            if OpenAt > Index then
-                table_insert(Out, WrapPlain(Text:sub(Index, OpenAt - 1), MaxLen))
-            end
-
-            local CloseAt = Text:find(PROTECT_CLOSE, OpenAt + 1, true)
-            if not CloseAt then
-                table_insert(Out, Text:sub(OpenAt + 1))
-                break
-            end
-
-            table_insert(Out, Text:sub(OpenAt + 1, CloseAt - 1))
-            Index = CloseAt + 1
-        end
-
-        return table_concat(Out)
-    end
-
-    Script.WrapText = Wrap
-    Script.GetMaxLen = GetMaxLen
-    Script.MarkProtected = function(S)
-        return PROTECT_OPEN .. tostring(S) .. PROTECT_CLOSE
-    end
-
-    function Script:AutoLabel(Parent, Text)
-        local Label = Parent:AddLabel(Wrap(Text, GetMaxLen()), true)
-        local OriginalSetText = Label.SetText
-
-        local RawText = tostring(Text)
-
-        Label.SetText = function(self, NewText)
-            if NewText ~= nil then
-                RawText = tostring(NewText)
-            end
-            return OriginalSetText(self, Wrap(RawText, GetMaxLen()))
-        end
-
-        local OriginalGetText = Label.GetText
-        if OriginalGetText then
-            Label.GetText = function(self) return RawText end
-        end
-
-        table_insert(self.AutoLabels, {
-            Handle = Label,
-            GetRaw = function() return RawText end,
-        })
-
-        return Label
-    end
-
-    Script:WhileLoop(0.25, function(self)
-        local MaxLen = GetMaxLen()
-        if self.Auto_MaxLen == MaxLen then return end
-        self.Auto_MaxLen = MaxLen
-
-        for _, Data in ipairs(self.AutoLabels or {}) do
-            Data.Handle:SetText(Data.GetRaw())
-        end
-    end, "Text_Resizer", false)
-end
-
 local Changelogs = Window:AddTab({
     Icon = "calendar",
     Name = "Changelogs",
@@ -1206,7 +1101,7 @@ local Games_Section = Changelogs:AddSection({
 })
 
 for _, Entry in ipairs(Info.SupportedGames) do
-    Script:AutoLabel(Games_Section, Entry.Game .. " · " .. Entry.Date)
+    Games_Section:AddLabel(Entry.Game .. " · " .. Entry.Date, true)
 end
 
 for i, Log in ipairs(Info.Changelogs) do
@@ -1223,9 +1118,9 @@ for i, Log in ipairs(Info.Changelogs) do
         Callback = function() end,
     })
 
-    for _, Change in ipairs(Log.Changes) do
-        Script:AutoLabel(Version_Section, Change)
-    end
+for _, Change in ipairs(Log.Changes) do
+    Version_Section:AddLabel(Change, true)
+end
 end
 
 local Commit_Section = Changelogs:AddSection({
@@ -1242,7 +1137,7 @@ Commit_Section:AddButton({
 local Version_File = "Mother/Assets/Version.cfg"
 local Protect = Script.MarkProtected
 
-local Latest_Commit = Script:AutoLabel(Commit_Section, "Fetching latest commit...")
+local Latest_Commit = Commit_Section:AddLabel("Fetching latest commit...", true)
 local Notify_Updates, Last_Sha = true, nil
 
 local function Update_Commit()
@@ -1252,12 +1147,10 @@ local function Update_Commit()
         return
     end
 
-    local NL = Protect("\n\n")
-
     Latest_Commit:SetText(
-        Commit.Message .. NL ..
-        "Author: " .. Commit.Author .. NL ..
-        Protect("SHA: #" .. Commit.Sha .. " · " .. Commit.TimeAgo)
+        Commit.Message .. "\n\n" ..
+        "Author: " .. Commit.Author .. "\n\n" ..
+        "SHA: #" .. Commit.Sha .. " · " .. Commit.TimeAgo
     )
 
     local FirstRun = (Last_Sha == nil)
@@ -1275,7 +1168,7 @@ local function Update_Commit()
     end
 end
 
-Commit_Section:AddLabel("Notify Updates"):AddToggle({
+Commit_Section:AddLabel("Notify Updates"):AddCheckbox({
     Default = Notify_Updates,
     Flag = "Notify_Updates",
     Callback = function(Value)
@@ -1328,7 +1221,7 @@ function Create_Interface()
     Window:AddTabLabel('About')
 
     local Credits = Window:AddTab({
-        Icon = "heart",
+        Icon = "tag-sparkle",
         Name = "Credits",
     })
 
@@ -1466,9 +1359,7 @@ Script:OnUnload(function()
     Script:SetGravity(196.2)
     Script:SetFOV(70)
 
-    for _, Instance in ipairs({
-        "Mother", "Notification", "Logging", "Multi_Support",
-    }) do
-        if globalEnv[Instance] then globalEnv[Instance] = nil end
+    if globalEnv["Multi_Support"] then 
+        globalEnv["Multi_Support"] = (nil) 
     end
 end)
