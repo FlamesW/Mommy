@@ -1,10 +1,19 @@
 -- // @Dashboard
 local Info = {
     SupportedGames = {
-        { Game = "Murder Mystery2", Date = "19/09/2026" },
+        { Game = "Murder Mystery2", Date = "3/10/2026" },
     },
 
     Changelogs = {
+        {
+            Title = "MommyW6 · 1.02",
+            Date = "3/10/2026",
+            Changes = {
+                "- Improved Auto Reset behavior when the coin bag is full.",
+                "- Auto Reset no longer interrupts 'Auto Shoot Murderer' while playing as Sheriff/Hero.",
+                "- Auto Reset no longer interrupts 'Auto Murder Everyone' while playing as Murderer.",
+            },
+        },
         {
             Title = "MommyW6 · 1.01",
             Date = "N/A",
@@ -13,7 +22,7 @@ local Info = {
             },
         },
     },
-    Build = "@1.01",
+    Build = "@1.02",
 }
 
 -- // @Caches
