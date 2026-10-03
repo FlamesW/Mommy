@@ -1,7 +1,7 @@
 -- // @Dashboard
 local Info = {
     SupportedGames = {
-        { Game = "Murder Mystery2", Date = "3/10/2026" },
+        { Game = "Murder Mystery 2", Date = "3/10/2026" },
     },
 
     Changelogs = {
