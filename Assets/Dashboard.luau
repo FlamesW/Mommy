@@ -10,8 +10,6 @@ local Info = {
             Date = "3/10/2026",
             Changes = {
                 "- Improved Auto Reset behavior when the coin bag is full.",
-                "- Auto Reset no longer interrupts 'Auto Shoot Murderer' while playing as Sheriff/Hero.",
-                "- Auto Reset no longer interrupts 'Auto Murder Everyone' while playing as Murderer.",
             },
         },
         {
