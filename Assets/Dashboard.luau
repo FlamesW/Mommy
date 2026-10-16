@@ -6,7 +6,7 @@ local Info = {
 
     Changelogs = {
         {
-            Title = "MommyW6 · 1.02",
+            Title = "Murder Mystery 2 · 1.02",
             Date = "3/10/2026",
             Changes = {
                 "- Improved Auto Reset behavior when the coin bag is full.",
