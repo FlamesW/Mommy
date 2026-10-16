@@ -25,8 +25,8 @@ globalEnv.Cache("@Settings", {
     Project = "MommyW6",
 
     Files = {
-        ["Murder Mystery 2"] = { File = "MM2/File.luau", Universe = 66654135, UUID = 142823291 },
-        ["Random Game"] = { File = "Random/File.luau", Universe = 9271746647, UUID = 123974602339071 },
+        ["Murder Mystery 2"] = { File = "MM2/File.luau", Universe = 66654135 },
+        ["Random Game"] = { File = "Random/File.luau", Universe = 9271746647 },
     },
 })
 
